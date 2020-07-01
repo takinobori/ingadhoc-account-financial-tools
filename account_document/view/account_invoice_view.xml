@@ -13,7 +13,7 @@
                 <field name="document_type_id"/>
             </field>
             <group position="inside">
-                <filter string="Document Type" domain="[]" context="{'group_by':'document_type_id'}"/>
+                <filter name="document_type_id" string="Document Type" domain="[]" context="{'group_by':'document_type_id'}"/>
             </group>
         </field>
     </record>
@@ -60,7 +60,7 @@
     </record>        -->
 
     <record id="view_invoice_form" model="ir.ui.view">
-        <field name="name">account.document invoice.form</field>
+        <field name="name">account.document_invoice.form</field>
         <field name="model">account.invoice</field>
         <field name="inherit_id" ref="account.invoice_form"/>
         <field name="arch" type="xml">
@@ -73,7 +73,7 @@
             </form>
 
             <field name="date_invoice" position="before">
-                <field name="journal_document_type_id" attrs="{'invisible': [('use_documents', '=', False)], 'required': [('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}" domain="[('id', 'in', available_journal_document_type_ids)]"/>
+                <field name="journal_document_type_id" string="Document Type" attrs="{'invisible': [('use_documents', '=', False)], 'required': [('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}" domain="[('id', 'in', available_journal_document_type_ids)]"/>
                 <field name="document_number" attrs="{'invisible': ['|', ('document_sequence_id', '!=', False), ('use_documents', '=', False)], 'required': [('document_sequence_id', '=', False), ('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}"/>
             </field>
 
@@ -83,7 +83,7 @@
 
             <field name="number" position="before">
                 <field name="display_name" attrs="{'invisible': [('display_name', '=', False)]}" class="oe_inline"/>
-                <label string="- Next Number: " attrs="{'invisible': [('next_number', 'in', (0, False))]}" class="oe_inline"/>
+                <label for="next_number" string="- Next Number: " attrs="{'invisible': [('next_number', 'in', (0, False))]}" class="oe_inline"/>
                 <field name="next_number" attrs="{'invisible': [('next_number', 'in', (0, False))]}" class="oe_inline"/>
             </field>
 
@@ -92,7 +92,7 @@
 
     <!-- add document number on paymentrs tree view. We make it in a separete view because portal users cant see this tag -->
 <!--         <record id="view_invoice_supplier_payment_doc_number_form" model="ir.ui.view">
-        <field name="name">l10n_ar.invoice.payment_doc_number.form</field>
+        <field name="name">l10n_ar_account.invoice.payment_doc_number.form</field>
         <field name="model">account.invoice</field>
         <field name="inherit_id" ref="account.invoice_supplier_form"/>
         <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
@@ -117,7 +117,7 @@
             </form>
 
             <field name="date_invoice" position="before">
-                <field name="journal_document_type_id" attrs="{'invisible': [('use_documents', '=', False)], 'required': [('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}" domain="[('id', 'in', available_journal_document_type_ids)]"/>
+                <field name="journal_document_type_id" string="Document Type" attrs="{'invisible': [('use_documents', '=', False)], 'required': [('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}" domain="[('id', 'in', available_journal_document_type_ids)]"/>
                 <field name="document_number" attrs="{'invisible': ['|', ('document_sequence_id', '!=', False), ('use_documents', '=', False)], 'required': [('document_sequence_id', '=', False), ('use_documents', '=', True)], 'readonly': ['|', ('state', '!=', 'draft'), ('move_name', '!=', False)]}"/>
             </field>
 
@@ -126,7 +126,7 @@
             </field>
 
             <h1 class="mt0" position="before">
-                <label string="- Next Number: " attrs="{'invisible': [('next_number', 'in', (0, False))]}" class="oe_inline"/>
+                <label for="next_number" string="- Next Number: " attrs="{'invisible': [('next_number', 'in', (0, False))]}" class="oe_inline"/>
                 <field name="next_number" attrs="{'invisible': [('next_number', 'in', (0, False))]}" class="oe_inline"/>
             </h1>
             <field name="number" position="before">

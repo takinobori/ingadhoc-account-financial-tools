@@ -27,16 +27,12 @@
                 <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting"/>
             </field>
             <group>
-                <filter string="Account Type" context="{'group_by':'user_type_id'}"/>
-                <filter string="Analytic Account" context="{'group_by':'analytic_account_id'}" groups="analytic.group_analytic_accounting"/>
-                <filter string="Company" domain="[]" name="group_company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                <filter name="user_type_id" string="Account Type" context="{'group_by':'user_type_id'}"/>
+                <filter name="analytic_account_id" string="Analytic Account" context="{'group_by':'analytic_account_id'}" groups="analytic.group_analytic_accounting"/>
+                <filter name="group_company" string="Company" domain="[]" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
             </group>
-            <filter context="{'group_by':'date'}" position="after">
-                <filter string="Due date" context="{'group_by':'date_maturity'}"/>
-            </filter>
-            <!-- add name to this group so it can be send as default by other modules -->
-            <filter context="{'group_by':'account_id'}" position="attributes">
-                <attribute name="name">group_by_account</attribute>
+            <filter name="groupby_date" context="{'group_by':'date'}" position="after">
+                <filter name="groupby_due_date" string="Due date" context="{'group_by':'date_maturity'}"/>
             </filter>
         </field>
     </record>
@@ -73,6 +69,44 @@
         <field name="view_mode">tree,graph,pivot</field>
     </record>
 
-    <menuitem id="menu_move_line_analisis" sequence="5" parent="account.account_reports_business_intelligence_menu" action="action_move_line_analisis"/>
+    <menuitem id="menu_move_line_analisis" sequence="5" parent="account.menu_action_account_invoice_report_all" action="action_move_line_analisis"/>
+
+    <record id="view_move_line_form" model="ir.ui.view">
+        <field name="name">account.move.line.form</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account.view_move_line_form"/>
+        <field name="groups_id" eval="[(4, ref('base.group_no_one'))]"/>
+        <field name="arch" type="xml">
+            <group groups="base.group_multi_currency" position="before">
+                <group string="Residuals">
+                    <field name="amount_residual"/>
+                    <field name="amount_residual_currency"/>
+                    <field name="reconciled"/>
+                </group>
+            </group>
+            <field name="matched_credit_ids" position="replace"/>
+            <field name="matched_debit_ids" position="replace"/>
+            <label for="full_reconcile_id" position="before">
+                <field name="matched_credit_ids" readonly="1" >
+                    <tree create="0">
+                        <field name="credit_move_id"/>
+                        <field name="amount" sum="Total"/>
+                        <field name="amount_currency" sum="Total"/>
+                        <field name="company_currency_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                    </tree>
+                </field>
+                <field name="matched_debit_ids" readonly="1" >
+                    <tree create="0">
+                        <field name="debit_move_id"/>
+                        <field name="amount" sum="Total"/>
+                        <field name="amount_currency" sum="Total"/>
+                        <field name="company_currency_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                    </tree>
+                </field>
+            </label>
+        </field>
+    </record>
 
 </odoo>

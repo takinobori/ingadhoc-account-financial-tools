@@ -5,10 +5,11 @@
 from odoo import models, fields
 
 
-class AccountBankStatement(models.Model):
+class AccountGroup(models.Model):
+    _inherit = 'account.group'
 
-    _inherit = "account.bank.statement"
-
-    journal_type = fields.Selection(
-        readonly=True
+    child_ids = fields.One2many(
+        'account.group',
+        'parent_id',
+        auto_join=True,
     )
