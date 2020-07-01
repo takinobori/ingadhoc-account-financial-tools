@@ -3,6 +3,7 @@
 # directory
 ##############################################################################
 from odoo import models, fields, api
+from odoo.addons import decimal_precision as dp
 # from odoo.exceptions import UserError
 import logging
 _logger = logging.getLogger(__name__)
@@ -11,17 +12,19 @@ _logger = logging.getLogger(__name__)
 class AccountInvoiceLine(models.Model):
     _inherit = "account.invoice.line"
 
-    report_price_unit = fields.Monetary(
+    report_price_unit = fields.Float(
         string='Unit Price',
-        compute='_compute_report_prices_and_taxes'
+        compute='_compute_report_prices_and_taxes',
+        digits=dp.get_precision('Report Product Price'),
     )
     report_price_subtotal = fields.Monetary(
         string='Amount',
         compute='_compute_report_prices_and_taxes'
     )
-    report_price_net = fields.Monetary(
+    report_price_net = fields.Float(
         string='Net Amount',
-        compute='_compute_report_prices_and_taxes'
+        compute='_compute_report_prices_and_taxes',
+        digits=dp.get_precision('Report Product Price'),
     )
     report_invoice_line_tax_ids = fields.One2many(
         compute="_compute_report_prices_and_taxes",
@@ -38,7 +41,11 @@ class AccountInvoiceLine(models.Model):
                 invoice.document_type_id and
                 invoice.document_type_id.get_taxes_included() or False)
             if not taxes_included:
-                report_price_unit = line.price_unit
+                price_unit = line.invoice_line_tax_ids.with_context(
+                    round=False).compute_all(
+                        line.price_unit, invoice.currency_id, 1.0,
+                        line.product_id, invoice.partner_id)
+                report_price_unit = price_unit['total_excluded']
                 report_price_subtotal = line.price_subtotal
                 not_included_taxes = line.invoice_line_tax_ids
                 report_price_net = report_price_unit * (
@@ -48,12 +55,16 @@ class AccountInvoiceLine(models.Model):
                     lambda x: x in taxes_included)
                 not_included_taxes = (
                     line.invoice_line_tax_ids - included_taxes)
-                report_price_unit = included_taxes.compute_all(
-                    line.price_unit, invoice.currency_id, 1.0, line.product_id,
-                    invoice.partner_id)['total_included']
+                report_price_unit = included_taxes.with_context(
+                    round=False).compute_all(
+                        line.price_unit, invoice.currency_id, 1.0,
+                        line.product_id, invoice.partner_id)['total_included']
                 report_price_net = report_price_unit * (
                     1 - (line.discount or 0.0) / 100.0)
-                report_price_subtotal = report_price_net * line.quantity
+                price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+                report_price_subtotal = included_taxes.compute_all(
+                    price, invoice.currency_id, line.quantity,
+                    line.product_id, invoice.partner_id)['total_included']
 
             line.report_price_subtotal = report_price_subtotal
             line.report_price_unit = report_price_unit
